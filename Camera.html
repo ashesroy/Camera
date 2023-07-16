@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <title>Camera Test</title>
+</head>
+<body onload="init();">
+    <div class="card mt-2" style="width: 500px;">
+        <div class="card-header">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-primary btn-sm ml-2" onclick="snapshot();">Take Snapshot</button> 
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <video onclick="snapshot(this);" width=200 height=200 id="video" controls autoplay></video>
+                <canvas  id="myCanvas" width="200" height="200"></canvas>
+            </div>
+        </div>
+        <div class="card-footer">
+            <p id="base64ImageID"></p>  
+        </div>
+    </div>
+  </body>
+</html>
+
+<script>
+    var canvas, ctx, video, webcamStream;
+    navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+    $(document).ready(function(){
+        startWebcam();
+    });
+    
+    function init() {
+        //canvas = document.getElementById("myCanvas");
+        canvas = document.getElementById("myCanvas");
+        ctx = canvas.getContext('2d');
+    }
+    function startWebcam() {
+        if (navigator.getUserMedia) {
+           navigator.getUserMedia (
+              {
+                 video: true,
+                 audio: false
+              },
+              function(localMediaStream) {
+                  video = document.querySelector('video');
+                 video.srcObject=localMediaStream;
+                 webcamStream = localMediaStream;
+              },
+              function(err) {
+                 console.log("The following error occured: " + err);
+              }
+           );
+        } else {
+           console.log("getUserMedia not supported");
+        }  
+      }
+
+      function snapshot() {
+        ctx.drawImage(video, 0,0, canvas.width, canvas.height);
+        const base64Canvas = canvas.toDataURL("image/jpeg").split(';base64,')[1];
+        webcamStream.getVideoTracks()[0].stop();
+        $('#base64ImageID').text(base64Canvas);
+      }
+</script>
